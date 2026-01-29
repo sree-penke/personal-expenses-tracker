@@ -23,8 +23,8 @@ Built by two developer freshers to gain practical experience with:
 **Database:** SQLite (dev) / PostgreSQL (prod-ready)
 
 ## 👥 Development Team
-- **Backend Engineer:** [Your Name]
-- **Frontend Engineer:** [Friend's Name]
+- **Backend Engineer:** [sri vamsi krishna Penke]
+- **Frontend Engineer:** [Pavan kumar Yerra]
 
 ## 🎓 Skills Gained
 - RESTful API best practices
