@@ -7,65 +7,89 @@
  * - Reports to submit
  * - Financial reviews to do
  *
- * Users can check off tasks as they complete them.
+ * Users can check off tasks and add new ones.
  *
  * LEARNING POINTS:
  * 1. State updates with arrays - Modifying items in an array
  * 2. Immutable updates - Creating new arrays instead of modifying existing ones
  * 3. Array.map() for updates - Transforming array items
- * 4. Callback functions - Passing data back from child interactions
+ * 4. Modal integration - Opening/closing modal for adding tasks
  *
  * STATE:
  * - taskList: Array of task objects that can be toggled complete/incomplete
+ * - isModalOpen: Controls visibility of AddTaskModal
  */
 
 import React, { useState } from 'react';
 import Header from '../components/common/Header';
+import AddTaskModal from '../components/modals/AddTaskModal';
 import { tasks } from '../data/mockData';
 
 function Tasks() {
   /**
    * Local state for task list
-   * We keep a copy so we can update task completion status
    */
   const [taskList, setTaskList] = useState(tasks);
 
   /**
+   * State for modal visibility
+   */
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  /**
+   * Open the add task modal
+   */
+  const handleAddClick = () => {
+    setIsModalOpen(true);
+  };
+
+  /**
+   * Close the modal
+   */
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  /**
+   * Handle new task submission
+   * Adds the new task to the list
+   */
+  const handleAddTask = (formData) => {
+    const newTask = {
+      id: Date.now(),
+      title: formData.title,
+      dueDate: new Date(formData.dueDate).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }),
+      priority: formData.priority,
+      completed: false,
+      description: formData.description,
+      assignee: formData.assignee || 'Unassigned',
+    };
+
+    setTaskList([newTask, ...taskList]);
+  };
+
+  /**
    * Toggle a task's completed status
-   *
-   * When user clicks a task's checkbox, this function:
-   * 1. Finds the task by its ID
-   * 2. Flips its 'completed' property (true -> false, false -> true)
-   * 3. Updates the state with the modified list
-   *
-   * @param {number} taskId - The ID of the task to toggle
    */
   const handleToggleTask = (taskId) => {
-    // Create a new array with the updated task
-    // map() creates a new array by transforming each item
     const updatedTasks = taskList.map((task) => {
-      // Check if this is the task we want to update
       if (task.id === taskId) {
-        // Return a new object with completed flipped
         return {
-          ...task, // Keep all other properties
-          completed: !task.completed, // Flip the completed value
+          ...task,
+          completed: !task.completed,
         };
       }
-      // For other tasks, return them unchanged
       return task;
     });
 
-    // Update state with the new array
     setTaskList(updatedTasks);
   };
 
   /**
    * Get CSS class for priority badge
-   * Different priorities have different colors
-   *
-   * @param {string} priority - 'high', 'medium', or 'low'
-   * @returns {string} CSS class name
    */
   const getPriorityClass = (priority) => {
     return `task-item__priority task-item__priority--${priority}`;
@@ -73,8 +97,13 @@ function Tasks() {
 
   return (
     <div className="tasks-page">
-      {/* Page header */}
-      <Header title="Tasks" showBackButton={false} showActions={false} />
+      {/* Page header with add button */}
+      <Header
+        title="Tasks"
+        showBackButton={false}
+        showActions={true}
+        onAddClick={handleAddClick}
+      />
 
       {/* Task list */}
       <div className="task-list">
@@ -87,7 +116,6 @@ function Tasks() {
               }`}
               onClick={() => handleToggleTask(task.id)}
             >
-              {/* Show checkmark when completed */}
               {task.completed && '✓'}
             </div>
 
@@ -120,6 +148,13 @@ function Tasks() {
           </p>
         </div>
       )}
+
+      {/* Add Task Modal */}
+      <AddTaskModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleAddTask}
+      />
     </div>
   );
 }

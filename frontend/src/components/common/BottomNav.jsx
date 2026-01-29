@@ -35,8 +35,8 @@ function BottomNav() {
     },
     {
       icon: '📋',
-      label: 'Activity',
-      path: '/activity',
+      label: 'Spends',
+      path: '/spends',
     },
     {
       icon: '✓',

@@ -19,7 +19,7 @@
  *
  * URL PATHS:
  * - "/" -> Dashboard (home page)
- * - "/activity" -> Activity page (all transactions)
+ * - "/spends" -> Spends page (all transactions)
  * - "/tasks" -> Tasks page
  * - "/settings" -> Settings page
  */
@@ -29,7 +29,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // Import page components
 import Dashboard from './pages/Dashboard';
-import Activity from './pages/Activity';
+import Spends from './pages/Spends';
 import Tasks from './pages/Tasks';
 import Settings from './pages/Settings';
 
@@ -61,8 +61,8 @@ function App() {
             {/* Dashboard - the home page, shown at root URL "/" */}
             <Route path="/" element={<Dashboard />} />
 
-            {/* Activity - shows all transactions */}
-            <Route path="/activity" element={<Activity />} />
+            {/* Spends - shows all transactions */}
+            <Route path="/spends" element={<Spends />} />
 
             {/* Tasks - task management page */}
             <Route path="/tasks" element={<Tasks />} />
