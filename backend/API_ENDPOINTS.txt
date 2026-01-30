@@ -1,0 +1,164 @@
+========================================
+        EXPENSE TRACKER API ENDPOINTS
+========================================
+
+Base URL: http://127.0.0.1:8000
+
+========================================
+            TASK APIs
+========================================
+
+1. GET ALL TASKS
+   Method: GET
+   URL: http://127.0.0.1:8000/api/tasks/
+   Body: None
+
+----------------------------------------
+
+2. GET SINGLE TASK
+   Method: GET
+   URL: http://127.0.0.1:8000/api/tasks/{id}/
+   Body: None
+
+----------------------------------------
+
+3. CREATE TASK
+   Method: POST
+   URL: http://127.0.0.1:8000/api/tasks/
+   Headers: Content-Type: application/json
+   Body:
+   {
+       "title": "Complete Django Tutorial",
+       "description": "Learn ViewSets and Serializers",
+       "due_date": "2025-02-15",
+       "priority": "High"
+   }
+
+----------------------------------------
+
+4. UPDATE TASK (Full Update)
+   Method: PUT
+   URL: http://127.0.0.1:8000/api/tasks/{id}/
+   Headers: Content-Type: application/json
+   Body:
+   {
+       "title": "Updated Title",
+       "description": "Updated description",
+       "due_date": "2025-03-01",
+       "priority": "Low"
+   }
+
+----------------------------------------
+
+5. UPDATE TASK (Partial Update)
+   Method: PATCH
+   URL: http://127.0.0.1:8000/api/tasks/{id}/
+   Headers: Content-Type: application/json
+   Body:
+   {
+       "priority": "Medium"
+   }
+
+----------------------------------------
+
+6. DELETE TASK
+   Method: DELETE
+   URL: http://127.0.0.1:8000/api/tasks/{id}/
+   Body: None
+
+
+========================================
+            SPEND APIs
+========================================
+
+1. GET ALL SPENDS
+   Method: GET
+   URL: http://127.0.0.1:8000/api/spends/
+   Body: None
+
+----------------------------------------
+
+2. GET SINGLE SPEND
+   Method: GET
+   URL: http://127.0.0.1:8000/api/spends/{id}/
+   Body: None
+
+----------------------------------------
+
+3. CREATE SPEND
+   Method: POST
+   URL: http://127.0.0.1:8000/api/spends/
+   Headers: Content-Type: application/json
+   Body:
+   {
+       "name": "Groceries",
+       "amount": 500.00,
+       "description": "Weekly groceries",
+       "date": "2025-01-30",
+       "category": "Food"
+   }
+
+----------------------------------------
+
+4. UPDATE SPEND (Full Update)
+   Method: PUT
+   URL: http://127.0.0.1:8000/api/spends/{id}/
+   Headers: Content-Type: application/json
+   Body:
+   {
+       "name": "Updated Groceries",
+       "amount": 750.00,
+       "description": "Monthly groceries",
+       "date": "2025-01-30",
+       "category": "Food"
+   }
+
+----------------------------------------
+
+5. UPDATE SPEND (Partial Update)
+   Method: PATCH
+   URL: http://127.0.0.1:8000/api/spends/{id}/
+   Headers: Content-Type: application/json
+   Body:
+   {
+       "amount": 600.00
+   }
+
+----------------------------------------
+
+6. DELETE SPEND
+   Method: DELETE
+   URL: http://127.0.0.1:8000/api/spends/{id}/
+   Body: None
+
+
+========================================
+        QUICK REFERENCE TABLE
+========================================
+
+ACTION          METHOD      TASK URL                SPEND URL
+------          ------      --------                ---------
+List all        GET         /api/tasks/             /api/spends/
+Get one         GET         /api/tasks/{id}/        /api/spends/{id}/
+Create          POST        /api/tasks/             /api/spends/
+Update full     PUT         /api/tasks/{id}/        /api/spends/{id}/
+Update partial  PATCH       /api/tasks/{id}/        /api/spends/{id}/
+Delete          DELETE      /api/tasks/{id}/        /api/spends/{id}/
+
+
+========================================
+              NOTES
+========================================
+
+- Replace {id} with actual UUID
+  Example: 550e8400-e29b-41d4-a716-446655440000
+
+- For POST, PUT, PATCH requests:
+  Always set Header: Content-Type: application/json
+
+- Response Codes:
+  200 OK         - Success (GET, PUT, PATCH)
+  201 Created    - Success (POST)
+  204 No Content - Success (DELETE)
+  400 Bad Request- Invalid data
+  404 Not Found  - ID not found
