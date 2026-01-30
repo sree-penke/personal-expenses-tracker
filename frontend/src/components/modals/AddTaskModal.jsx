@@ -31,7 +31,6 @@ function AddTaskModal({ isOpen, onClose, onSubmit }) {
     description: '',
     dueDate: '',
     priority: 'low',
-    assignee: '',
   });
 
   /**
@@ -59,7 +58,6 @@ function AddTaskModal({ isOpen, onClose, onSubmit }) {
       description: '',
       dueDate: '',
       priority: 'low',
-      assignee: '',
     });
 
     onClose();
@@ -74,7 +72,6 @@ function AddTaskModal({ isOpen, onClose, onSubmit }) {
       description: '',
       dueDate: '',
       priority: 'low',
-      assignee: '',
     });
     onClose();
   };
@@ -166,22 +163,6 @@ function AddTaskModal({ isOpen, onClose, onSubmit }) {
                   <option value="high">High</option>
                 </select>
               </div>
-            </div>
-
-            {/* Assignee */}
-            <div className="form-group">
-              <label className="form-label" htmlFor="assignee">
-                Assignee
-              </label>
-              <input
-                type="text"
-                id="assignee"
-                name="assignee"
-                className="form-input"
-                placeholder="Unassigned"
-                value={formData.assignee}
-                onChange={handleChange}
-              />
             </div>
           </div>
 

@@ -65,7 +65,6 @@ function Tasks() {
       priority: formData.priority,
       completed: false,
       description: formData.description,
-      assignee: formData.assignee || 'Unassigned',
     };
 
     setTaskList([newTask, ...taskList]);
