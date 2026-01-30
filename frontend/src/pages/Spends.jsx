@@ -72,9 +72,8 @@ function Spends() {
     <div className="activity-page">
       {/* Page header with add button */}
       <Header
-        title="Spends"
+        title="Activity"
         showBackButton={false}
-        showActions={true}
         onAddClick={handleAddClick}
       />
 

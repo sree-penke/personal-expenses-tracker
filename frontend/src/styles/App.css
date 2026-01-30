@@ -89,15 +89,16 @@ body {
 .app {
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
 }
 
 .app__content {
   flex: 1;
-  padding-bottom: 80px; /* Space for bottom navigation */
-  max-width: 800px;
-  margin: 0 auto;
-  width: 100%;
+  /* fill the full horizontal space minus the sidebar width */
+  padding-left: 230px; /* Space for left sidebar (match .side-nav width) */
+  padding-right: 0;
+  max-width: none;
+  margin: 0;
+  width: calc(100% - 230px);
 }
 
 /* ============================================
@@ -106,14 +107,54 @@ body {
    ============================================ */
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-md) var(--spacing-lg);
+  flex-direction: column;
   background-color: var(--white);
   border-bottom: 1px solid var(--gray-200);
   position: sticky;
   top: 0;
   z-index: 100;
+}
+
+.header__nav {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.header__nav-item {
+  text-decoration: none;
+  color: var(--gray-600);
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+  padding-bottom: 8px;
+  border-bottom: 2px solid transparent;
+}
+
+.header__nav-item:hover {
+  color: var(--primary-color);
+}
+
+.header__nav-item--active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.header__middle{
+  display: flex;
+  justify-content: space-around;
+}
+
+.header__titles{
+  padding-left: 9px;
+}
+
+.header__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
 }
 
 .header__left {
@@ -196,7 +237,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-md);
-  padding: var(--spacing-lg);
+  padding: 0; /* remove outer horizontal padding so cards align with edges */
 }
 
 /* Responsive: Stack cards on mobile */
@@ -288,7 +329,38 @@ body {
    List of transactions
    ============================================ */
 .activity-list {
-  padding: 0 var(--spacing-lg);
+  padding: 0; /* remove outer padding so list spans full width */
+}
+
+/* Ensure direct children of content don't add horizontal gaps */
+.app__content > * {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* ============================================
+   Dashboard page - remove horizontal gaps
+   Make dashboard sections fill the available content width
+   ============================================ */
+.dashboard-page {
+  padding: 0;
+  max-width: none;
+  width: 100%;
+}
+
+.dashboard-page .summary-cards {
+  padding: var(--spacing-lg) 0;
+}
+
+.dashboard-page .section-header {
+  padding: 0;
+  margin: var(--spacing-lg) 0 var(--spacing-md);
+}
+
+.dashboard-page .activity-list {
+  padding: 0;
 }
 
 .activity-item {
@@ -360,43 +432,83 @@ body {
 }
 
 /* ============================================
-   BOTTOM NAVIGATION
-   Fixed navigation at bottom
+   SIDE NAVIGATION
+   Fixed vertical navigation on left
    ============================================ */
-.bottom-nav {
+.side-nav {
   position: fixed;
-  bottom: 0;
+  top: 0;
   left: 0;
-  right: 0;
+  bottom: 0;
+  width: 230px;
   background-color: var(--white);
-  border-top: 1px solid var(--gray-200);
+  border-right: 1px solid var(--gray-200);
   display: flex;
-  justify-content: space-around;
-  padding: var(--spacing-sm) 0;
+  flex-direction: column;
+  align-items: center;
+  padding-top: var(--spacing-lg);
+  gap: var(--spacing-md);
   z-index: 100;
 }
 
-.bottom-nav__item {
+.side-nav__item {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   padding: var(--spacing-sm) var(--spacing-md);
   color: var(--gray-400);
   text-decoration: none;
-  font-size: 0.75rem;
-  transition: color 0.2s ease;
-  background: none;
-  border: none;
-  cursor: pointer;
+  font-size: 0.9rem;
+  transition: color 0.2s ease, background-color 0.15s ease;
+  width: 100%;
+  justify-content: flex-start;
 }
 
-.bottom-nav__item--active {
+.side-nav__item--active {
   color: var(--primary-color);
+  background-color: rgba(99,102,241,0.06);
 }
 
-.bottom-nav__icon {
+.side-nav__icon {
   font-size: 1.25rem;
-  margin-bottom: 4px;
+  margin-right: 8px;
+}
+
+.side-nav__label {
+  font-size: 0.95rem;
+  opacity: 0.95;
+  margin: 0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* On small screens, move nav back to bottom and keep previous spacing */
+@media (max-width: 640px) {
+  .side-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    height: auto;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: var(--spacing-sm) 0;
+    border-right: none;
+    border-top: 1px solid var(--gray-200);
+  }
+
+  .side-nav__label {
+    /* keep labels horizontal on mobile */
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  .app__content {
+    padding-left: 0;
+    padding-bottom: 80px; /* Space for bottom nav on small screens */
+  }
 }
 
 /* ============================================
@@ -803,6 +915,11 @@ body {
 /* ============================================
    ACTIVITY PAGE
    ============================================ */
+.dashboard-page{
+  padding: var(--spacing-lg);
+}  
+
+
 .activity-page {
   padding: var(--spacing-lg);
 }

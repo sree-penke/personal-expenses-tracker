@@ -51,7 +51,7 @@ function BottomNav() {
   ];
 
   return (
-    <nav className="bottom-nav">
+    <nav className="side-nav" aria-label="Primary navigation">
       {/* Loop through each nav item and create a Link */}
       {navItems.map((item) => {
         // Check if this item's path matches the current URL
@@ -59,12 +59,12 @@ function BottomNav() {
 
         return (
           <Link
-            key={item.path}  // Unique key required when using map()
-            to={item.path}   // Where the link goes
-            className={`bottom-nav__item ${isActive ? 'bottom-nav__item--active' : ''}`}
+            key={item.path}
+            to={item.path}
+            className={`side-nav__item ${isActive ? 'side-nav__item--active' : ''}`}
           >
-            <span className="bottom-nav__icon">{item.icon}</span>
-            <span>{item.label}</span>
+            <span className="side-nav__icon">{item.icon}</span>
+            <span className="side-nav__label">{item.label}</span>
           </Link>
         );
       })}

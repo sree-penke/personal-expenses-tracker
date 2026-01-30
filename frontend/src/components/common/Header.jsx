@@ -21,30 +21,40 @@
  */
 
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 function Header({ title, showBackButton, showActions, onAddClick, onBackClick }) {
+  const location = useLocation();
+
+  const navItems = [
+    { label: 'Dashboard', path: '/' },
+    { label: 'Activity', path: '/activity' },
+    { label: 'Tasks', path: '/tasks' },
+    { label: 'Settings', path: '/settings' },
+  ];
+
   return (
     <header className="header">
-      {/* Left side: Either back button or avatar */}
-      <div className="header__left">
-        {showBackButton ? (
-          // Show back button if showBackButton is true
-          <button className="header__back-btn" onClick={onBackClick}>
-            ←
-          </button>
-        ) : (
-          // Show avatar if showBackButton is false
-          <div className="header__avatar">
-            {/* Display first letter of title or 'U' for User */}
-            {title ? title.charAt(0) : 'U'}
-          </div>
-        )}
-        <h1 className="header__title">{title}</h1>
-      </div>
-
-      {/* Right side: Action buttons (only show if showActions is true) */}
-      {showActions && (
-        <div className="header__actions">
+      {/* Top navigation - Links to all pages */}
+      <nav className="header__nav">
+        <div className="header__middle">
+          {showBackButton ? (
+            // Show back button if showBackButton is true
+            <button className="header__back-btn" onClick={onBackClick}>
+              ←
+            </button>
+          ) : (
+            // Show avatar if showBackButton is false
+            <div className="header__avatar">
+              {/* Display first letter of title or 'U' for User */}
+              {title ? title.charAt(0) : 'U'}
+            </div>
+          )}
+          <h1 className="header__titles">{title}</h1>
+        </div>
+         
+          
+          <div className="header__actions">
           {/* Search button */}
           <button className="icon-btn icon-btn--secondary">
             🔍
@@ -54,7 +64,9 @@ function Header({ title, showBackButton, showActions, onAddClick, onBackClick })
             +
           </button>
         </div>
-      )}
+      </nav>
+
+      {/* Page header with title and actions */}
     </header>
   );
 }

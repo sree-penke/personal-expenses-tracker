@@ -89,6 +89,31 @@ function Settings() {
   };
 
   /**
+   * Handle add button click on settings
+   */
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [savedEmail, setSavedEmail] = useState('');
+
+  const handleAddClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSaveEmail = (e) => {
+    e.preventDefault();
+    const email = e.target.email.value;
+    if (email.trim()) {
+      setSavedEmail(email);
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+      handleCloseModal();
+    }
+  };
+
+  /**
    * List of setting tabs
    * Makes it easy to add/remove tabs later
    */
@@ -102,7 +127,7 @@ function Settings() {
   return (
     <div className="settings-page">
       {/* Page header with back button */}
-      <Header title="Settings" showBackButton={true} showActions={false} />
+      <Header title="Settings" showBackButton={false} onAddClick={handleAddClick} />
 
       {/* Success alert - only shown when showAlert is true */}
       {showAlert && (
@@ -168,6 +193,45 @@ function Settings() {
             {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} settings
             coming soon!
           </p>
+        </div>
+      )}
+
+      {/* Add Email Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal__handle"></div>
+            <div className="modal__header">
+              <h2 className="modal__title">Add Email Notification</h2>
+              <button className="modal__close" onClick={handleCloseModal}>
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleSaveEmail} className="modal__body">
+              <div className="form-group">
+                <label className="form-label">Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Enter email"
+                  className="form-input"
+                  required
+                />
+              </div>
+              <div className="modal__footer">
+                <button
+                  type="button"
+                  className="btn btn--secondary"
+                  onClick={handleCloseModal}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn--primary">
+                  Add Email
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

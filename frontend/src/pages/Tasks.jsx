@@ -149,11 +149,68 @@ function Tasks() {
       )}
 
       {/* Add Task Modal */}
-      <AddTaskModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSubmit={handleAddTask}
-      />
+      {isModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal__handle"></div>
+            <div className="modal__header">
+              <h2 className="modal__title">Add New Task</h2>
+              <button className="modal__close" onClick={handleCloseModal}>
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleAddTask} className="modal__body">
+              <div className="form-group">
+                <label className="form-label">Task Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  placeholder="Enter task"
+                  className="form-input"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Due Date</label>
+                <input
+                  type="date"
+                  name="dueDate"
+                  value={formData.dueDate}
+                  onChange={handleInputChange}
+                  className="form-input"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Priority</label>
+                <select
+                  name="priority"
+                  value={formData.priority}
+                  onChange={handleInputChange}
+                  className="form-input form-select"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+              <div className="modal__footer">
+                <button
+                  type="button"
+                  className="btn btn--secondary"
+                  onClick={handleCloseModal}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn--primary">
+                  Add Task
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

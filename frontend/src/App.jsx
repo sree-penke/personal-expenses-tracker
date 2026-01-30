@@ -45,14 +45,18 @@ import BottomNav from './components/common/BottomNav';
 function App() {
   return (
     // BrowserRouter wraps the entire app to enable routing
+
     <BrowserRouter>
+
       <div className="app">
+      
         {/*
           Main content area
           This is where page components will be rendered
           The padding-bottom in CSS ensures content doesn't hide behind bottom nav
         */}
         <main className="app__content">
+          
           {/*
             Routes component contains all our route definitions
             Only one route will be rendered at a time based on the URL
@@ -62,7 +66,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
 
             {/* Spends - shows all transactions */}
-            <Route path="/spends" element={<Spends />} />
+            <Route path="/activity" element={<Spends />} />
 
             {/* Tasks - task management page */}
             <Route path="/tasks" element={<Tasks />} />
