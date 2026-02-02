@@ -4,84 +4,173 @@
  * WHAT THIS FILE DOES:
  * This is the root component of our React application. It:
  * - Sets up React Router for navigation between pages
+ * - Handles authentication routing (login, signup, protected routes)
  * - Defines the app's layout structure
- * - Includes the bottom navigation that appears on all pages
  *
  * LEARNING POINTS:
  * 1. React Router setup - BrowserRouter, Routes, Route components
- * 2. Layout components - Wrapping pages with common elements
- * 3. Route definitions - Mapping URLs to page components
- *
- * REACT ROUTER EXPLAINED:
- * - BrowserRouter: Enables navigation without page refresh
- * - Routes: Container for all route definitions
- * - Route: Maps a URL path to a component
+ * 2. Protected routes - Redirecting unauthenticated users to login
+ * 3. Conditional rendering - Showing nav only when logged in
+ * 4. Navigate component - Programmatic redirection
  *
  * URL PATHS:
- * - "/" -> Dashboard (home page)
- * - "/spends" -> Spends page (all transactions)
- * - "/tasks" -> Tasks page
- * - "/settings" -> Settings page
+ * - "/login" -> Login page (public)
+ * - "/signup" -> Signup page (public)
+ * - "/" -> Dashboard (protected)
+ * - "/spends" -> Spends page (protected)
+ * - "/tasks" -> Tasks page (protected)
+ * - "/settings" -> Settings page (protected)
  */
 
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 // Import page components
 import Dashboard from './pages/Dashboard';
 import Spends from './pages/Spends';
 import Tasks from './pages/Tasks';
 import Settings from './pages/Settings';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
 // Import shared components
 import BottomNav from './components/common/BottomNav';
 
+// Import auth helper
+import { isAuthenticated } from './services/api';
+
+/**
+ * ProtectedRoute Component
+ *
+ * Wraps routes that require authentication.
+ * If user is not logged in, redirects to login page.
+ *
+ * LEARNING POINT:
+ * This is a common pattern called "Higher Order Component" (HOC)
+ * It wraps other components to add functionality (auth check)
+ *
+ * @param {ReactNode} children - The component to render if authenticated
+ */
+function ProtectedRoute({ children }) {
+  // Check if user is authenticated
+  if (!isAuthenticated()) {
+    // Redirect to login if not authenticated
+    return <Navigate to="/login" replace />;
+  }
+
+  // Render the protected component if authenticated
+  return children;
+}
+
+/**
+ * PublicRoute Component
+ *
+ * Wraps routes that should only be accessible when NOT logged in.
+ * If user is already logged in, redirects to dashboard.
+ *
+ * @param {ReactNode} children - The component to render if not authenticated
+ */
+function PublicRoute({ children }) {
+  // Check if user is authenticated
+  if (isAuthenticated()) {
+    // Redirect to dashboard if already logged in
+    return <Navigate to="/" replace />;
+  }
+
+  // Render the public component if not authenticated
+  return children;
+}
+
+/**
+ * AppContent Component
+ *
+ * Handles the main app layout and conditionally shows navigation.
+ * Separated from App to use useLocation hook (must be inside Router)
+ */
+function AppContent() {
+  const location = useLocation();
+
+  // Routes where we don't show the navigation
+  const authRoutes = ['/login', '/signup'];
+  const showNav = !authRoutes.includes(location.pathname);
+
+  return (
+    <div className="app">
+      <main className={showNav ? 'app__content' : 'app__content--full'}>
+        <Routes>
+          {/* Public Routes - Only accessible when NOT logged in */}
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <PublicRoute>
+                <Signup />
+              </PublicRoute>
+            }
+          />
+
+          {/* Protected Routes - Only accessible when logged in */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/spends"
+            element={
+              <ProtectedRoute>
+                <Spends />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tasks"
+            element={
+              <ProtectedRoute>
+                <Tasks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch all - redirect to dashboard or login */}
+          <Route
+            path="*"
+            element={<Navigate to={isAuthenticated() ? '/' : '/login'} replace />}
+          />
+        </Routes>
+      </main>
+
+      {/* Only show navigation when logged in and not on auth pages */}
+      {showNav && <BottomNav />}
+    </div>
+  );
+}
+
 /**
  * Main App Component
- *
- * This component is rendered by index.js and contains the entire application.
- * It sets up the routing and layout structure.
  */
 function App() {
   return (
-    // BrowserRouter wraps the entire app to enable routing
-
     <BrowserRouter>
-
-      <div className="app">
-      
-        {/*
-          Main content area
-          This is where page components will be rendered
-          The padding-bottom in CSS ensures content doesn't hide behind bottom nav
-        */}
-        <main className="app__content">
-          
-          {/*
-            Routes component contains all our route definitions
-            Only one route will be rendered at a time based on the URL
-          */}
-          <Routes>
-            {/* Dashboard - the home page, shown at root URL "/" */}
-            <Route path="/" element={<Dashboard />} />
-
-            {/* Spends - shows all transactions */}
-            <Route path="/activity" element={<Spends />} />
-
-            {/* Tasks - task management page */}
-            <Route path="/tasks" element={<Tasks />} />
-
-            {/* Settings - user preferences and profile */}
-            <Route path="/settings" element={<Settings />} />
-          </Routes>
-        </main>
-
-        {/*
-          Bottom Navigation
-          This appears on all pages because it's outside the Routes component
-        */}
-        <BottomNav />
-      </div>
+      <AppContent />
     </BrowserRouter>
   );
 }

@@ -10,30 +10,43 @@
  * LEARNING POINTS:
  * 1. Component composition - Breaking UI into smaller, reusable pieces
  * 2. Props for data - Passing user data from parent component
- * 3. Callback functions - Passing functions to handle events in parent
+ * 3. Default values - Handling missing data gracefully
  *
  * PROPS EXPLAINED:
  * @param {object} user - User object with name, email, accountType
  * @param {function} onSave - Function to call when user saves changes
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function ProfileSection({ user, onSave }) {
   /**
+   * Get safe user values with defaults
+   */
+  const userName = user?.name || 'User';
+  const userEmail = user?.email || '';
+  const userAccountType = user?.accountType || 'Personal Account';
+
+  /**
    * Local state for form editing
-   *
-   * We keep a local copy of the user data that can be edited.
-   * This way, changes aren't saved until the user clicks "Save".
    */
   const [formData, setFormData] = useState({
-    name: user.name,
-    email: user.email,
+    name: userName,
+    email: userEmail,
   });
 
   /**
+   * Update form when user prop changes
+   */
+  useEffect(() => {
+    setFormData({
+      name: user?.name || 'User',
+      email: user?.email || '',
+    });
+  }, [user]);
+
+  /**
    * Handle input changes
-   * Updates our local form state as user types
    */
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -45,7 +58,6 @@ function ProfileSection({ user, onSave }) {
 
   /**
    * Handle save button click
-   * Calls the parent's onSave function with updated data
    */
   const handleSave = () => {
     onSave(formData);
@@ -59,14 +71,13 @@ function ProfileSection({ user, onSave }) {
       <div className="profile-section">
         {/* Avatar with edit icon */}
         <div className="profile-avatar">
-          {/* Display first letter of name as avatar placeholder */}
-          {user.name.charAt(0).toUpperCase()}
+          {userName.charAt(0).toUpperCase()}
           <span className="profile-avatar__edit">📷</span>
         </div>
 
         {/* User name and account type */}
-        <h4 className="profile-name">{user.name}</h4>
-        <p className="profile-type">{user.accountType}</p>
+        <h4 className="profile-name">{userName}</h4>
+        <p className="profile-type">{userAccountType}</p>
 
         {/* Change photo button */}
         <button className="profile-change-btn">Change Photo</button>

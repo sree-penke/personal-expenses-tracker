@@ -20,83 +20,63 @@
  * @param {boolean} isOpen - Whether the modal should be visible
  * @param {function} onClose - Function to call when modal should close
  * @param {function} onSubmit - Function to call with form data when submitted
+ * @param {boolean} isSubmitting - Whether form is currently being submitted
  */
 
 import React, { useState } from 'react';
-import { categories } from '../../data/mockData';
 
-function AddEntryModal({ isOpen, onClose, onSubmit }) {
+/**
+ * Default categories list
+ * In future, this could be fetched from API
+ */
+const categories = [
+  { id: 1, name: 'Food', icon: '🍔' },
+  { id: 2, name: 'Electronics', icon: '📱' },
+  { id: 3, name: 'Health', icon: '💪' },
+  { id: 4, name: 'Business', icon: '💼' },
+  { id: 5, name: 'Income', icon: '💰' },
+  { id: 6, name: 'Transport', icon: '🚗' },
+  { id: 7, name: 'Entertainment', icon: '🎬' },
+  { id: 8, name: 'Shopping', icon: '🛒' },
+  { id: 9, name: 'Utilities', icon: '💡' },
+  { id: 10, name: 'Rent', icon: '🏠' },
+];
+
+function AddEntryModal({ isOpen, onClose, onSubmit, isSubmitting = false }) {
   /**
-   * useState for form data
-   *
-   * We store all form fields in a single state object.
-   * Initial values are empty strings or defaults.
-   *
-   * This approach is cleaner than having separate useState for each field.
+   * Form data state
    */
   const [formData, setFormData] = useState({
     name: '',
     amount: '',
     description: '',
     category: '',
-    date: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
+    date: new Date().toISOString().split('T')[0],
   });
 
   /**
    * Handle input changes
-   *
-   * This function runs every time a user types in any input field.
-   * It updates the formData state with the new value.
-   *
-   * @param {object} event - The event object from the input
    */
   const handleChange = (event) => {
-    // Get the name and value from the input that triggered this
     const { name, value } = event.target;
-
-    // Update formData, keeping all other fields the same
-    // The [name] syntax lets us use a variable as the key
     setFormData({
-      ...formData,      // Spread existing values
-      [name]: value,    // Update the changed field
+      ...formData,
+      [name]: value,
     });
   };
 
   /**
    * Handle form submission
-   *
-   * Prevents the default form behavior (page refresh)
-   * and calls the onSubmit prop with the form data.
-   *
-   * @param {object} event - The form submit event
    */
   const handleSubmit = (event) => {
-    // Prevent the default form submission (which would refresh the page)
     event.preventDefault();
-
-    // Call the onSubmit function passed from parent with our form data
     onSubmit(formData);
-
-    // Reset the form to empty values
-    setFormData({
-      name: '',
-      amount: '',
-      description: '',
-      category: '',
-      date: new Date().toISOString().split('T')[0],
-    });
-
-    // Close the modal
-    onClose();
   };
 
   /**
    * Handle cancel button click
-   *
-   * Resets the form and closes the modal without saving.
    */
   const handleCancel = () => {
-    // Reset form data
     setFormData({
       name: '',
       amount: '',
@@ -104,27 +84,19 @@ function AddEntryModal({ isOpen, onClose, onSubmit }) {
       category: '',
       date: new Date().toISOString().split('T')[0],
     });
-    // Close the modal
     onClose();
   };
 
-  // Don't render anything if modal is not open
-  // This is a common pattern for conditional rendering
+  // Don't render if modal is closed
   if (!isOpen) {
     return null;
   }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      {/*
-        Stop click events from bubbling up to the overlay
-        This prevents the modal from closing when clicking inside it
-      */}
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        {/* Drag handle indicator */}
         <div className="modal__handle"></div>
 
-        {/* Modal header with title and close button */}
         <div className="modal__header">
           <h2 className="modal__title">Create New Entry</h2>
           <button className="modal__close" onClick={onClose}>
@@ -132,10 +104,9 @@ function AddEntryModal({ isOpen, onClose, onSubmit }) {
           </button>
         </div>
 
-        {/* Modal body with form */}
         <form onSubmit={handleSubmit}>
           <div className="modal__body">
-            {/* Row 1: Name and Amount side by side */}
+            {/* Row 1: Name and Amount */}
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label" htmlFor="name">
@@ -150,6 +121,7 @@ function AddEntryModal({ isOpen, onClose, onSubmit }) {
                   value={formData.name}
                   onChange={handleChange}
                   required
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -168,11 +140,12 @@ function AddEntryModal({ isOpen, onClose, onSubmit }) {
                   value={formData.amount}
                   onChange={handleChange}
                   required
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
 
-            {/* Row 2: Description (full width) */}
+            {/* Row 2: Description */}
             <div className="form-group">
               <label className="form-label" htmlFor="description">
                 Description
@@ -184,10 +157,11 @@ function AddEntryModal({ isOpen, onClose, onSubmit }) {
                 placeholder="Add more details about this transaction..."
                 value={formData.description}
                 onChange={handleChange}
+                disabled={isSubmitting}
               ></textarea>
             </div>
 
-            {/* Row 3: Category and Date side by side */}
+            {/* Row 3: Category and Date */}
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label" htmlFor="category">
@@ -200,9 +174,9 @@ function AddEntryModal({ isOpen, onClose, onSubmit }) {
                   value={formData.category}
                   onChange={handleChange}
                   required
+                  disabled={isSubmitting}
                 >
                   <option value="">Select Category</option>
-                  {/* Map through categories to create options */}
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.name}>
                       {cat.icon} {cat.name}
@@ -223,22 +197,27 @@ function AddEntryModal({ isOpen, onClose, onSubmit }) {
                   value={formData.date}
                   onChange={handleChange}
                   required
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
           </div>
 
-          {/* Modal footer with action buttons */}
           <div className="modal__footer">
             <button
               type="button"
               className="btn btn--secondary"
               onClick={handleCancel}
+              disabled={isSubmitting}
             >
               Cancel
             </button>
-            <button type="submit" className="btn btn--primary">
-              Create Entry
+            <button
+              type="submit"
+              className="btn btn--primary"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating...' : 'Create Entry'}
             </button>
           </div>
         </form>

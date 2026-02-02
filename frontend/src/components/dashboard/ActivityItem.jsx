@@ -13,6 +13,7 @@
  * 1. Conditional CSS classes - Adding different styles based on data
  * 2. Ternary operator - condition ? valueIfTrue : valueIfFalse
  * 3. Number formatting - Displaying currency properly
+ * 4. Default values - Using fallbacks when data is missing
  *
  * PROPS EXPLAINED:
  * @param {object} transaction - Object containing all transaction data
@@ -22,25 +23,50 @@
  *   - amount: Number amount
  *   - type: 'income' or 'expense'
  *   - status: 'completed' or 'pending'
+ *   - icon: (optional) Category icon from API
  */
 
 import React from 'react';
-import { categories } from '../../data/mockData';
+
+/**
+ * Default category icons mapping
+ * Used when API doesn't provide an icon
+ */
+const categoryIcons = {
+  Food: '🍔',
+  Electronics: '📱',
+  Health: '💪',
+  Business: '💼',
+  Income: '💰',
+  Transport: '🚗',
+  Entertainment: '🎬',
+  Shopping: '🛒',
+  Utilities: '💡',
+  Rent: '🏠',
+  Other: '📄',
+};
 
 function ActivityItem({ transaction }) {
-  // Destructure transaction object to get individual values
-  // This is cleaner than writing transaction.name, transaction.amount, etc.
-  const { name, category, date, amount, type, status } = transaction;
+  // Destructure transaction object with default values
+  const {
+    name = 'Unknown',
+    category = 'Other',
+    date = '',
+    amount = 0,
+    type = 'expense',
+    status = 'completed',
+    icon, // Optional icon from API
+  } = transaction;
 
   /**
-   * Find the icon for this transaction's category
-   * We search the categories array for a matching category name
+   * Get the icon for this transaction's category
+   * Uses icon from API if available, otherwise uses local mapping
    */
   const getCategoryIcon = () => {
-    // find() returns the first item that matches the condition
-    const categoryData = categories.find((cat) => cat.name === category);
-    // Return the icon if found, otherwise return a default icon
-    return categoryData ? categoryData.icon : '📄';
+    // If API provides icon, use it
+    if (icon) return icon;
+    // Otherwise, look up in our local mapping
+    return categoryIcons[category] || categoryIcons.Other;
   };
 
   /**
@@ -54,7 +80,6 @@ function ActivityItem({ transaction }) {
       maximumFractionDigits: 2,
     });
 
-    // Add + or - prefix based on transaction type
     if (type === 'income') {
       return `+$${formattedNumber}`;
     }
@@ -76,17 +101,10 @@ function ActivityItem({ transaction }) {
 
       {/* Right: Amount and status */}
       <div className="activity-item__amount">
-        {/* Amount with conditional styling based on type */}
-        <div
-          className={`activity-item__value activity-item__value--${type}`}
-        >
+        <div className={`activity-item__value activity-item__value--${type}`}>
           {formatAmount()}
         </div>
-
-        {/* Status badge with conditional styling */}
-        <div
-          className={`activity-item__status activity-item__status--${status}`}
-        >
+        <div className={`activity-item__status activity-item__status--${status}`}>
           {status === 'pending' ? 'Pending' : 'Completed'}
         </div>
       </div>

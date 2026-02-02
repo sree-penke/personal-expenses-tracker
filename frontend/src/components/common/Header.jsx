@@ -3,14 +3,15 @@
  *
  * WHAT THIS COMPONENT DOES:
  * Displays the header at the top of each page with:
- * - Back button (optional) or avatar
+ * - User avatar with name initial
  * - Page title
  * - Action buttons (search, add new)
+ * - User menu with logout option
  *
  * LEARNING POINTS:
- * 1. Props - Data passed from parent component (title, showBackButton, etc.)
- * 2. Conditional rendering - Using && and ternary operators to show/hide elements
- * 3. Event handlers - Functions that run when user clicks buttons
+ * 1. Getting user data from storage
+ * 2. Dropdown menu toggle
+ * 3. Logout functionality
  *
  * PROPS EXPLAINED:
  * @param {string} title - The text to display as the page title
@@ -20,53 +21,94 @@
  * @param {function} onBackClick - Function to call when back button is clicked
  */
 
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { getCurrentUser, logout } from '../../services/api';
 
 function Header({ title, showBackButton, showActions, onAddClick, onBackClick }) {
-  const location = useLocation();
+  /**
+   * State for user menu dropdown
+   */
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const navItems = [
-    { label: 'Dashboard', path: '/' },
-    { label: 'Activity', path: '/activity' },
-    { label: 'Tasks', path: '/tasks' },
-    { label: 'Settings', path: '/settings' },
-  ];
+  /**
+   * Get current user from storage
+   */
+  const user = getCurrentUser();
+  const userName = user?.name || 'User';
+  const userInitial = userName.charAt(0).toUpperCase();
+
+  /**
+   * Toggle user menu dropdown
+   */
+  const handleAvatarClick = () => {
+    setShowUserMenu(!showUserMenu);
+  };
+
+  /**
+   * Handle logout
+   */
+  const handleLogout = () => {
+    logout();
+  };
+
+  /**
+   * Close menu when clicking outside
+   */
+  const handleCloseMenu = () => {
+    setShowUserMenu(false);
+  };
 
   return (
     <header className="header">
-      {/* Top navigation - Links to all pages */}
       <nav className="header__nav">
+        {/* Left side: Back button or Avatar with Title */}
         <div className="header__middle">
           {showBackButton ? (
-            // Show back button if showBackButton is true
             <button className="header__back-btn" onClick={onBackClick}>
               ←
             </button>
           ) : (
-            // Show avatar if showBackButton is false
-            <div className="header__avatar">
-              {/* Display first letter of title or 'U' for User */}
-              {title ? title.charAt(0) : 'U'}
+            <div className="header__user">
+              <div
+                className="header__avatar"
+                onClick={handleAvatarClick}
+                title={userName}
+              >
+                {userInitial}
+              </div>
+              {/* User dropdown menu */}
+              {showUserMenu && (
+                <>
+                  <div className="header__menu-overlay" onClick={handleCloseMenu}></div>
+                  <div className="header__menu">
+                    <div className="header__menu-header">
+                      <span className="header__menu-name">{userName}</span>
+                      <span className="header__menu-email">{user?.email || ''}</span>
+                    </div>
+                    <div className="header__menu-divider"></div>
+                    <button className="header__menu-item" onClick={handleLogout}>
+                      <span>🚪</span> Logout
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
           <h1 className="header__titles">{title}</h1>
         </div>
-         
-          
-          <div className="header__actions">
-          {/* Search button */}
-          <button className="icon-btn icon-btn--secondary">
-            🔍
-          </button>
-          {/* Add new button */}
-          <button className="icon-btn icon-btn--primary" onClick={onAddClick}>
-            +
-          </button>
-        </div>
-      </nav>
 
-      {/* Page header with title and actions */}
+        {/* Right side: Action buttons */}
+        {showActions && (
+          <div className="header__actions">
+            <button className="icon-btn icon-btn--secondary">
+              🔍
+            </button>
+            <button className="icon-btn icon-btn--primary" onClick={onAddClick}>
+              +
+            </button>
+          </div>
+        )}
+      </nav>
     </header>
   );
 }

@@ -5,6 +5,71 @@
 Base URL: http://127.0.0.1:8000
 
 ========================================
+         AUTHENTICATION APIs
+========================================
+
+1. REGISTER (Create new user)
+   Method: POST
+   URL: http://127.0.0.1:8000/api/register/
+   Headers: Content-Type: application/json
+   Body:
+   {
+       "username": "john",
+       "email": "john@example.com",
+       "password": "mypassword123"
+   }
+
+   Success Response (201):
+   {
+       "message": "User registered successfully",
+       "token": "abc123xyz...",
+       "user": {
+           "id": 1,
+           "username": "john",
+           "email": "john@example.com"
+       }
+   }
+
+----------------------------------------
+
+2. LOGIN
+   Method: POST
+   URL: http://127.0.0.1:8000/api/login/
+   Headers: Content-Type: application/json
+   Body:
+   {
+       "username": "john",
+       "password": "mypassword123"
+   }
+
+   Success Response (200):
+   {
+       "message": "Login successful",
+       "token": "abc123xyz...",
+       "user": {
+           "id": 1,
+           "username": "john",
+           "email": "john@example.com"
+       }
+   }
+
+----------------------------------------
+
+3. LOGOUT
+   Method: POST
+   URL: http://127.0.0.1:8000/api/logout/
+   Headers:
+       Content-Type: application/json
+       Authorization: Token abc123xyz...
+   Body: None
+
+   Success Response (200):
+   {
+       "message": "Logged out successfully"
+   }
+
+
+========================================
             TASK APIs
 ========================================
 
@@ -136,14 +201,32 @@ Base URL: http://127.0.0.1:8000
         QUICK REFERENCE TABLE
 ========================================
 
-ACTION          METHOD      TASK URL                SPEND URL
-------          ------      --------                ---------
-List all        GET         /api/tasks/             /api/spends/
-Get one         GET         /api/tasks/{id}/        /api/spends/{id}/
-Create          POST        /api/tasks/             /api/spends/
-Update full     PUT         /api/tasks/{id}/        /api/spends/{id}/
-Update partial  PATCH       /api/tasks/{id}/        /api/spends/{id}/
-Delete          DELETE      /api/tasks/{id}/        /api/spends/{id}/
+AUTH ENDPOINTS:
+ACTION          METHOD      URL
+------          ------      ---
+Register        POST        /api/register/
+Login           POST        /api/login/
+Logout          POST        /api/logout/
+
+TASK ENDPOINTS:
+ACTION          METHOD      URL
+------          ------      ---
+List all        GET         /api/tasks/
+Get one         GET         /api/tasks/{id}/
+Create          POST        /api/tasks/
+Update full     PUT         /api/tasks/{id}/
+Update partial  PATCH       /api/tasks/{id}/
+Delete          DELETE      /api/tasks/{id}/
+
+SPEND ENDPOINTS:
+ACTION          METHOD      URL
+------          ------      ---
+List all        GET         /api/spends/
+Get one         GET         /api/spends/{id}/
+Create          POST        /api/spends/
+Update full     PUT         /api/spends/{id}/
+Update partial  PATCH       /api/spends/{id}/
+Delete          DELETE      /api/spends/{id}/
 
 
 ========================================
@@ -156,9 +239,13 @@ Delete          DELETE      /api/tasks/{id}/        /api/spends/{id}/
 - For POST, PUT, PATCH requests:
   Always set Header: Content-Type: application/json
 
+- For protected endpoints (logout):
+  Add Header: Authorization: Token your_token_here
+
 - Response Codes:
-  200 OK         - Success (GET, PUT, PATCH)
-  201 Created    - Success (POST)
+  200 OK         - Success (GET, PUT, PATCH, Login, Logout)
+  201 Created    - Success (POST, Register)
   204 No Content - Success (DELETE)
   400 Bad Request- Invalid data
+  401 Unauthorized - Invalid credentials or missing token
   404 Not Found  - ID not found

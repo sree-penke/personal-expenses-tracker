@@ -2,39 +2,70 @@
  * Tasks.jsx - Tasks Management Page Component
  *
  * WHAT THIS PAGE DOES:
- * Displays a list of financial tasks/reminders like:
- * - Bills to pay
- * - Reports to submit
- * - Financial reviews to do
- *
- * Users can check off tasks and add new ones.
+ * Displays a list of financial tasks/reminders.
+ * Users can add new tasks and mark them as complete.
  *
  * LEARNING POINTS:
- * 1. State updates with arrays - Modifying items in an array
- * 2. Immutable updates - Creating new arrays instead of modifying existing ones
- * 3. Array.map() for updates - Transforming array items
- * 4. Modal integration - Opening/closing modal for adding tasks
- *
- * STATE:
- * - taskList: Array of task objects that can be toggled complete/incomplete
- * - isModalOpen: Controls visibility of AddTaskModal
+ * 1. CRUD operations - Create, Read, Update tasks via API
+ * 2. useEffect for initial data loading
+ * 3. Handling multiple API operations (toggle, create)
+ * 4. State synchronization with backend
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/common/Header';
 import AddTaskModal from '../components/modals/AddTaskModal';
-import { tasks } from '../data/mockData';
+import { getTasks, createTask, updateTask } from '../services/api';
 
 function Tasks() {
   /**
-   * Local state for task list
+   * State for task list
    */
-  const [taskList, setTaskList] = useState(tasks);
+  const [taskList, setTaskList] = useState([]);
 
   /**
    * State for modal visibility
    */
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  /**
+   * State for loading
+   */
+  const [isLoading, setIsLoading] = useState(true);
+
+  /**
+   * State for error
+   */
+  const [error, setError] = useState(null);
+
+  /**
+   * State for form submission
+   */
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  /**
+   * Fetch tasks from API
+   */
+  const fetchTasks = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await getTasks();
+      setTaskList(data);
+    } catch (err) {
+      setError('Failed to load tasks. Please try again.');
+      console.error('Fetch tasks error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Load tasks when component mounts
+   */
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
   /**
    * Open the add task modal
@@ -52,39 +83,58 @@ function Tasks() {
 
   /**
    * Handle new task submission
-   * Adds the new task to the list
    */
-  const handleAddTask = (formData) => {
-    const newTask = {
-      id: Date.now(),
-      title: formData.title,
-      dueDate: new Date(formData.dueDate).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      }),
-      priority: formData.priority,
-      completed: false,
-      description: formData.description,
-    };
+  const handleAddTask = async (formData) => {
+    try {
+      setIsSubmitting(true);
 
-    setTaskList([newTask, ...taskList]);
+      const taskData = {
+        title: formData.title,
+        description: formData.description,
+        dueDate: formData.dueDate,
+        priority: formData.priority,
+      };
+
+      await createTask(taskData);
+      await fetchTasks(); // Refresh list
+      handleCloseModal();
+    } catch (err) {
+      alert('Failed to add task. Please try again.');
+      console.error('Create task error:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   /**
-   * Toggle a task's completed status
+   * Toggle task completed status
+   * Sends PATCH request to update task on server
    */
-  const handleToggleTask = (taskId) => {
-    const updatedTasks = taskList.map((task) => {
-      if (task.id === taskId) {
-        return {
-          ...task,
-          completed: !task.completed,
-        };
-      }
-      return task;
-    });
+  const handleToggleTask = async (taskId) => {
+    // Find the task to toggle
+    const task = taskList.find((t) => t.id === taskId);
+    if (!task) return;
 
-    setTaskList(updatedTasks);
+    try {
+      // Optimistic update - update UI immediately
+      setTaskList((prevTasks) =>
+        prevTasks.map((t) =>
+          t.id === taskId ? { ...t, completed: !t.completed } : t
+        )
+      );
+
+      // Send update to API
+      await updateTask(taskId, { completed: !task.completed });
+    } catch (err) {
+      // Revert on error
+      setTaskList((prevTasks) =>
+        prevTasks.map((t) =>
+          t.id === taskId ? { ...t, completed: task.completed } : t
+        )
+      );
+      alert('Failed to update task. Please try again.');
+      console.error('Update task error:', err);
+    }
   };
 
   /**
@@ -93,6 +143,49 @@ function Tasks() {
   const getPriorityClass = (priority) => {
     return `task-item__priority task-item__priority--${priority}`;
   };
+
+  /**
+   * Show loading state
+   */
+  if (isLoading) {
+    return (
+      <div className="tasks-page">
+        <Header
+          title="Tasks"
+          showBackButton={false}
+          showActions={true}
+          onAddClick={handleAddClick}
+        />
+        <div className="empty-state">
+          <div className="empty-state__icon">⏳</div>
+          <p className="empty-state__message">Loading tasks...</p>
+        </div>
+      </div>
+    );
+  }
+
+  /**
+   * Show error state
+   */
+  if (error) {
+    return (
+      <div className="tasks-page">
+        <Header
+          title="Tasks"
+          showBackButton={false}
+          showActions={true}
+          onAddClick={handleAddClick}
+        />
+        <div className="empty-state">
+          <div className="empty-state__icon">❌</div>
+          <p className="empty-state__message">{error}</p>
+          <button className="btn btn--primary" onClick={fetchTasks}>
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="tasks-page">
@@ -105,112 +198,63 @@ function Tasks() {
       />
 
       {/* Task list */}
-      <div className="task-list">
-        {taskList.map((task) => (
-          <div key={task.id} className="task-item">
-            {/* Clickable checkbox */}
-            <div
-              className={`task-item__checkbox ${
-                task.completed ? 'task-item__checkbox--checked' : ''
-              }`}
-              onClick={() => handleToggleTask(task.id)}
-            >
-              {task.completed && '✓'}
-            </div>
-
-            {/* Task content */}
-            <div className="task-item__content">
+      {taskList.length > 0 ? (
+        <div className="task-list">
+          {taskList.map((task) => (
+            <div key={task.id} className="task-item">
+              {/* Clickable checkbox */}
               <div
-                className={`task-item__title ${
-                  task.completed ? 'task-item__title--completed' : ''
+                className={`task-item__checkbox ${
+                  task.completed ? 'task-item__checkbox--checked' : ''
                 }`}
+                onClick={() => handleToggleTask(task.id)}
               >
-                {task.title}
+                {task.completed && '✓'}
               </div>
-              <div className="task-item__due">Due: {task.dueDate}</div>
+
+              {/* Task content */}
+              <div className="task-item__content">
+                <div
+                  className={`task-item__title ${
+                    task.completed ? 'task-item__title--completed' : ''
+                  }`}
+                >
+                  {task.title}
+                </div>
+                <div className="task-item__due">Due: {task.dueDate}</div>
+              </div>
+
+              {/* Priority badge */}
+              <span className={getPriorityClass(task.priority)}>
+                {task.priority}
+              </span>
             </div>
-
-            {/* Priority badge */}
-            <span className={getPriorityClass(task.priority)}>
-              {task.priority}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Show message if all tasks are completed */}
-      {taskList.every((task) => task.completed) && (
+          ))}
+        </div>
+      ) : (
         <div className="empty-state">
-          <div className="empty-state__icon">🎉</div>
+          <div className="empty-state__icon">📋</div>
           <p className="empty-state__message">
-            All tasks completed! Great job!
+            No tasks yet. Add your first task!
           </p>
         </div>
       )}
 
-      {/* Add Task Modal */}
-      {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal__handle"></div>
-            <div className="modal__header">
-              <h2 className="modal__title">Add New Task</h2>
-              <button className="modal__close" onClick={handleCloseModal}>
-                ✕
-              </button>
-            </div>
-            <form onSubmit={handleAddTask} className="modal__body">
-              <div className="form-group">
-                <label className="form-label">Task Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  placeholder="Enter task"
-                  className="form-input"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Due Date</label>
-                <input
-                  type="date"
-                  name="dueDate"
-                  value={formData.dueDate}
-                  onChange={handleInputChange}
-                  className="form-input"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Priority</label>
-                <select
-                  name="priority"
-                  value={formData.priority}
-                  onChange={handleInputChange}
-                  className="form-input form-select"
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </div>
-              <div className="modal__footer">
-                <button
-                  type="button"
-                  className="btn btn--secondary"
-                  onClick={handleCloseModal}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn--primary">
-                  Add Task
-                </button>
-              </div>
-            </form>
-          </div>
+      {/* Show message if all tasks are completed */}
+      {taskList.length > 0 && taskList.every((task) => task.completed) && (
+        <div className="empty-state">
+          <div className="empty-state__icon">🎉</div>
+          <p className="empty-state__message">All tasks completed! Great job!</p>
         </div>
       )}
+
+      {/* Add Task Modal */}
+      <AddTaskModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleAddTask}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 }
